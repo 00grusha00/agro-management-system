@@ -1,16 +1,19 @@
-# Agro Management System — Архитектура модулей
+# Agro Management System — Java Module Architecture
 
-## 1. Декомпозиция системы и матрица взаимодействия
+## 1. Модульдердің өзара әрекеттесу матрицасы
 
-Система разделена на 4 независимых слоя для упрощения тестирования и масштабирования:
-
-| Модуль | Основная функция | Входные данные | Выходной результат | Зависимости |
+| Модуль атауы (Java Package) | Негізгі қызметі | Кіріс деректері | Шығыс нәтижесі | Тәуелділігі |
 | :--- | :--- | :--- | :--- | :--- |
-| **Model** | Описание структур данных (датчики, поля, пользователи) | Сырые значения | Объекты данных | Нет (Ядро) |
-| **Repository** | Чтение и запись данных в хранилище | Объекты моделей / критерии поиска | Списки записей / статус | `Model` |
-| **Service** | Бизнес-логика, проверка норм влажности и температуры | Показания датчиков, запросы | Отчёты, уведомления | `Model`, `Repository` |
-| **UI / API** | Взаимодействие с пользователем и вывод результатов | Действия пользователя | Таблицы, графики, JSON | `Service`, `Model` |
+| **com.agro.model** | Датчиктер мен алқаптардың құрылымы (`record` / POJO) | `String id`, `double temp`, `double humidity` | `SensorReading` | Тәуелсіз ядро |
+| **com.agro.repository** | Дерекқорға жазу және оқу (`interface` және `implements`) | `SensorReading` немесе `String fieldId` | `List<SensorReading>` немесе `boolean` | `com.agro.model` |
+| **com.agro.service** | Валидация, нормамен салыстыру, шешім қабылдау | Көрсеткіштер, сұраныстар | Талдау есебі (`String` / DTO), ескерту | `model`, `repository` (`interface`) |
+| **com.agro.ui** | Пайдаланушы сұранысын алу және нәтиже көрсету | Пайдаланушы әрекеті / HTTP сұраныс | Консоль кестесі немесе JSON | `service`, `model` |
 
-## 2. Схема интеграции компонентов
+## 2. Java интерфейстік келісімшарты (UI -> SensorService)
 
-![Схема архитектуры модулей](./architecture-diagram.png)
+* `String analyzeFieldCondition(String fieldId)` — алқап жағдайы бойынша талдау есебі мен ескертуді қайтарады.
+* `boolean registerNewSensorData(String fieldId, double temperature, double humidity)` — деректерді тексеріп сақтайды (`true` немесе қате кезінде `false` / `IllegalArgumentException`).
+
+## 3. Интеграция схемасы
+
+![Java Module Architecture Diagram](docs/architecture-diagram.png)
